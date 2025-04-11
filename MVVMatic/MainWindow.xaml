@@ -47,16 +47,15 @@
             Grid.Column="1"
             Margin="10"
             Orientation="Vertical">
-            
+
             <StackPanel
                 HorizontalAlignment="Right"
                 VerticalAlignment="Center"
                 Orientation="Horizontal">
                 <Button
                     Margin="5"
-                    Content="Selecteer Solution"
                     Click="BtnSelecteerSolution"
-                    />
+                    Content="Selecteer Solution" />
 
                 <TextBox
                     Width="120"
@@ -102,11 +101,11 @@
                 <TextBlock
                     HorizontalAlignment="Right"
                     VerticalAlignment="Center"
-                    Text="Schema/Folder" />
+                    Text="Schema" />
                 <TextBox
                     Width="120"
                     Margin="2"
-                    Text="{Binding SchemaFolder, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                    Text="{Binding Schema, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
             </StackPanel>
             <StackPanel
                 HorizontalAlignment="Right"
@@ -115,11 +114,50 @@
                 <TextBlock
                     HorizontalAlignment="Right"
                     VerticalAlignment="Center"
-                    Text="Table/Model" />
+                    Text="Folder" />
                 <TextBox
                     Width="120"
                     Margin="2"
-                    Text="{Binding TableModel, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                    Text="{Binding Folder, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+            </StackPanel>
+            <StackPanel
+                HorizontalAlignment="Right"
+                VerticalAlignment="Center"
+                Orientation="Horizontal">
+                <TextBlock
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Center"
+                    Text="Table" />
+                <TextBox
+                    Width="120"
+                    Margin="2"
+                    Text="{Binding Table, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+            </StackPanel>
+            <StackPanel
+                HorizontalAlignment="Right"
+                VerticalAlignment="Center"
+                Orientation="Horizontal">
+                <TextBlock
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Center"
+                    Text="NameSpace" />
+                <TextBox
+                    Width="120"
+                    Margin="2"
+                    Text="{Binding Namespace, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+            </StackPanel>
+            <StackPanel
+                HorizontalAlignment="Right"
+                VerticalAlignment="Center"
+                Orientation="Horizontal">
+                <TextBlock
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Center"
+                    Text="Model" />
+                <TextBox
+                    Width="120"
+                    Margin="2"
+                    Text="{Binding Model, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
             </StackPanel>
             <DataGrid
                 x:Name="KolommenGrid"
@@ -157,6 +195,11 @@
                     Margin="5"
                     Click="BtnGenereerAllCodePreview_Click"
                     Content="Genereer All Code Preview" />
+
+                <Button
+                    Margin="5"
+                    Click="BtnGenereerAllCode_Click"
+                    Content="Genereer All Code" />
 
             </StackPanel>
         </StackPanel>

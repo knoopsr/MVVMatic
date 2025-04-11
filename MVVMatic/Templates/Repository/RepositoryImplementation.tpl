@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using {ModelNamespace};
+using {Namespace}.Model.{Folder};
 using Microsoft.Data.SqlClient;
 using System.Collections.ObjectModel;
 using System.Data;
 
-namespace {RepositoryNamespace}
+namespace {Namespace}.DAL.{Folder}
 {
     public class cls{ModelName}Repository : I{ModelName}Repository
     {
@@ -22,7 +22,7 @@ namespace {RepositoryNamespace}
         {
             (DataTable DT, bool OK, string Boodschap) =
                 clsDAL.ExecuteDataTable(Properties.Resources.D_{ModelName},
-                clsDAL.Parameter("{ModelName}ID", entity.{ModelName}ID),
+                clsDAL.Parameter("ID", entity.ID),
                 clsDAL.Parameter("ControlField", entity.ControlField),
                 clsDAL.Parameter("@ReturnValue", 0));
             if (!OK)
@@ -66,7 +66,7 @@ namespace {RepositoryNamespace}
             {
                 GenerateCollection();
             }
-            return MijnCollectie.FirstOrDefault(e => e.{ModelName}ID == id);
+            return MijnCollectie.FirstOrDefault(e => e.ID == id);
         }
 
         public cls{ModelName}Model GetFirst()

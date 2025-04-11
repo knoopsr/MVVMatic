@@ -31,24 +31,53 @@ namespace MVVMatic
         public string DatabaseName
         {
             get => _databaseName;
-            set {
-            _databaseName = value;
+            set
+            {
+                _databaseName = value;
                 OnPropertyChanged();
             }
         }
 
-        private string _schemaFolder = "dbo";
-        public string SchemaFolder
+        private string _schema = "dbo";
+        public string Schema
         {
-            get => _schemaFolder;
-            set => _schemaFolder = value;
+            get => _schema;
+            set
+            {
+                _schema = value;
+                OnPropertyChanged();
+            }
+        }
+        private string _folder = "Personen";
+        public string Folder
+        {
+            get => _folder;
+            set
+            {
+                _folder = value;
+                OnPropertyChanged();
+            }
         }
 
-        private string _tableModel = "MyTable";
-        public string TableModel
+        private string _table = "Personen";
+        public string Table
         {
-            get => _tableModel;
-            set => _tableModel = value;
+            get => _table;
+            set
+            {
+                _table = value;
+                OnPropertyChanged();
+            }
+        }
+        private string _model = "Persoon";
+        public string Model
+        {
+            get => _model;
+            set
+            {
+                _model = value;
+                OnPropertyChanged();
+            }
         }
 
         private string _solution = string.Empty;
@@ -73,14 +102,25 @@ namespace MVVMatic
             }
         }
 
+        private string _namespace = "TestMVVM";
+        public string Namespace
+        {
+            get => _namespace;
+            set
+            {
+                _namespace = value;
+                OnPropertyChanged();
+            }
+        }
+
 
 
 
 
         public static List<string> SupportedTypes { get; } = new()
-    {
-        "string", "int", "bool", "DateTime", "decimal"
-    };
+        {
+            "string", "int", "bool", "DateTime", "decimal"
+        };
 
         private ObservableCollection<KolomDefinitie> kolommen = new();
 
@@ -121,16 +161,23 @@ namespace MVVMatic
         private void BtnGenereerAllCodePreview_Click(object sender, RoutedEventArgs e)
         {
 
-            string createTableSql = GenereerCreateTable(SchemaFolder, TableModel, kolommen.ToList());
-            string insertProcedureSql = GenereerInsertStoredProcedure(DatabaseName, SchemaFolder, TableModel, TableModel, kolommen.ToList());
-            string selectProcedureSql = GenereerSelectStoredProcedure(DatabaseName, SchemaFolder, TableModel, TableModel, kolommen.ToList());
-            string updateProcedureSql = GenereerUpdateStoredProcedure(DatabaseName, SchemaFolder, TableModel, TableModel, kolommen.ToList());
-            string deleteProcedureSql = GenereerDeleteStoredProcedure(DatabaseName, SchemaFolder, TableModel, TableModel);
+            string createTableSql = GenereerCreateTable(Schema, Table, kolommen.ToList());
+            string insertProcedureSql = GenereerInsertStoredProcedure(DatabaseName, Schema, Table, Table, kolommen.ToList());
+            string selectProcedureSql = GenereerSelectStoredProcedure(DatabaseName, Schema, Table, Table, kolommen.ToList());
+            string updateProcedureSql = GenereerUpdateStoredProcedure(DatabaseName, Schema, Table, Table, kolommen.ToList());
+            string deleteProcedureSql = GenereerDeleteStoredProcedure(DatabaseName, Schema, Table, Table);
 
 
-            string modelClass = GenereerModelClass("MyNamespace", SchemaFolder, TableModel, kolommen.ToList());
+            string modelClass = GenereerModelClass();
 
-            string repositoryInterface = GenereerRepositoryInterface("MyNamespace", SchemaFolder, TableModel);
+            string repositoryInterface = GenereerRepositoryInterface();
+
+            string repositoryClass = GenereerRepositoryClass();
+            string dataServiceInterface = GenereerDataServiceInterface();
+            string dataServiceClass = GenereerDataServiceClass();
+            string viewModelClass = GenereerViewModel();
+            string viewUserControl = GenereerXamlUserControl();
+            string viewCodeBehind = GenereerXamlCodeBehind();
 
 
             OutputTextBox.Text = string.Empty; // Clear previous output
@@ -150,6 +197,18 @@ namespace MVVMatic
 
             OutputTextBox.Text += "\n\n";
             OutputTextBox.Text += repositoryInterface;
+            OutputTextBox.Text += "\n\n";
+            OutputTextBox.Text += repositoryClass;
+            OutputTextBox.Text += "\n\n";
+            OutputTextBox.Text += dataServiceInterface;
+            OutputTextBox.Text += "\n\n";
+            OutputTextBox.Text += dataServiceClass;
+            OutputTextBox.Text += "\n\n";
+            OutputTextBox.Text += viewModelClass;
+            OutputTextBox.Text += "\n\n";
+            OutputTextBox.Text += viewUserControl;
+            OutputTextBox.Text += "\n\n";
+            OutputTextBox.Text += viewCodeBehind;
 
 
 
@@ -278,7 +337,7 @@ namespace MVVMatic
                 .Replace("{TableName}", tableName);
         }
 
-        private string GenereerModelClass(string namespaceName, string schema, string modelName, List<KolomDefinitie> kolommen)
+        private string GenereerModelClass()
         {
             string template = File.ReadAllText("Templates/Model/Model.tpl");
 
@@ -290,16 +349,16 @@ namespace MVVMatic
                 // property
                 string csharpType = MapToCSharpType(kolom.Type);
                 propsSb.AppendLine($@"
-        private {csharpType} _{kolom.KolomNaam};
-        public {csharpType} {kolom.KolomNaam}
-        {{
-            get => _{kolom.KolomNaam};
-            set
-            {{
-                _{kolom.KolomNaam} = value;
-                OnPropertyChanged();
-            }}
-        }}");
+                    private {csharpType} _{kolom.KolomNaam};
+                    public {csharpType} {kolom.KolomNaam}
+                    {{
+                        get => _{kolom.KolomNaam};
+                        set
+                        {{
+                            _{kolom.KolomNaam} = value;
+                            OnPropertyChanged();
+                        }}
+                    }}");
 
                 // eenvoudige validatie voor string
                 if (csharpType == "string")
@@ -324,29 +383,117 @@ namespace MVVMatic
             string displayExpr = $"$\"{string.Join(" ", kolommen.Take(2).Select(k => "{" + k.KolomNaam + "}"))}\"";
 
             return template
-                .Replace("{Namespace}", namespaceName)
-                .Replace("{Folder}", schema)
-                .Replace("{ModelName}", modelName)
+                .Replace("{Namespace}", Namespace)
+                .Replace("{Folder}", Folder)
+                .Replace("{ModelName}", Model)
                 .Replace("{Properties}", propsSb.ToString())
                 .Replace("{ToStringExpression}", toStringExpr)
                 .Replace("{DisplayNameExpression}", displayExpr)
                 .Replace("{ValidationRules}", valSb.ToString());
         }
-
-        private string GenereerRepositoryInterface(string namespaceName, string schema, string modelName)
+        private string GenereerRepositoryInterface()
         {
             string template = File.ReadAllText("Templates/Repository/RepositoryInterface.tpl");
 
             return template
-                .Replace("{Namespace}", namespaceName)
-                .Replace("{Folder}", schema)
-                .Replace("{ModelName}", modelName);
+                .Replace("{Namespace}", Namespace)
+                .Replace("{Folder}", Folder)
+                .Replace("{ModelName}", Model);
         }
 
-        private void Button_Click(object sender, RoutedEventArgs e)
+        private string GenereerRepositoryClass()
         {
+            string template = File.ReadAllText("Templates/Repository/RepositoryImplementation.tpl");
 
+            var propertyLines = new StringBuilder();
+            var insertParams = new StringBuilder();
+            var updateParams = new StringBuilder();
+
+            for (int i = 0; i < kolommen.Count; i++)
+            {
+                var k = kolommen[i];
+                string line = $"                    {k.KolomNaam} = reader[{k.KolomNaam}] != DBNull.Value ? ({MapToCSharpType(k.Type)})reader[{i}] : default,";
+
+                propertyLines.AppendLine(line);
+
+                // insert
+                string insert = $"                clsDAL.Parameter(\"{k.KolomNaam}\", entity.{k.KolomNaam}),";
+                if (k.Type == "byte[]")
+                {
+                    insert = $"                clsDAL.Parameter(\"{k.KolomNaam}\", entity.{k.KolomNaam} != null ? (object)entity.{k.KolomNaam} : DBNull.Value, SqlDbType.VarBinary),";
+                }
+                insertParams.AppendLine(insert);
+
+                // update
+                string update = insert; // zelfde als insert
+                updateParams.AppendLine(update);
+            }
+
+            insertParams.AppendLine("                clsDAL.Parameter(\"@ReturnValue\", 0)");
+            updateParams.AppendLine("                clsDAL.Parameter(\"ControlField\", entity.ControlField),");
+            updateParams.AppendLine("                clsDAL.Parameter(\"@ReturnValue\", 0)");
+
+            return template
+                .Replace("{Namespace}", Namespace)
+                .Replace("{Folder}", Folder)
+                .Replace("{ModelName}", Model)
+                .Replace("{PropertyAssignments}", propertyLines.ToString().TrimEnd('\n', '\r'))
+                .Replace("{InsertParameters}", insertParams.ToString().TrimEnd(',', '\n', '\r'))
+                .Replace("{UpdateParameters}", updateParams.ToString().TrimEnd(',', '\n', '\r'))
+                .Replace("{LastIndex}", kolommen.Count.ToString());
         }
+
+        private string GenereerDataServiceInterface()
+        {
+            string template = File.ReadAllText("Templates/DataService/DataServiceInterface.tpl");
+
+            return template
+                .Replace("{Namespace}", Namespace)
+                .Replace("{Folder}", Folder)
+                .Replace("{ModelName}", Model);
+        }
+        private string GenereerDataServiceClass()
+        {
+            string template = File.ReadAllText("Templates/DataService/DataServiceClass.tpl");
+
+            return template
+                .Replace("{Namespace}", Namespace)
+                .Replace("{Folder}",Folder)
+                .Replace("{ModelName}", Model);
+        }
+
+        private string GenereerViewModel()
+        {
+            string template = File.ReadAllText("Templates/ViewModel/ViewModel.tpl");
+
+            return template
+                .Replace("{Namespace}", Namespace)
+                .Replace("{Folder}", Folder)
+                .Replace("{ModelName}", Model);
+        }
+
+        private string GenereerXamlUserControl()
+        {
+            string template = File.ReadAllText("Templates/View/ViewUserControl.tpl");
+
+            return template
+                .Replace("{Namespace}", $"{Namespace}.View.{Folder}")
+                .Replace("{ClassName}", $"uc{Model}")
+                .Replace("{ViewModelBinding}", $"{Model}ViewModel")
+                .Replace("{Title}", Model);
+        }
+
+        private string GenereerXamlCodeBehind()
+        {
+            string template = File.ReadAllText("Templates/View/UserControlCodeBehind.tpl");
+
+            return template
+                .Replace("{Namespace}", Namespace)
+                .Replace("{Folder}", Folder)
+                .Replace("{ModelName}", Model);
+        }
+
+
 
 
         private void BtnSelecteerSolution(object sender, RoutedEventArgs e)
@@ -361,6 +508,7 @@ namespace MVVMatic
             if (dialog.ShowDialog() == true)
             {
                 Solution = Path.GetDirectoryName(dialog.FileName);
+                //Solution = "C:\\Users\\ronny\\source\\repos\\TestMVVM";
 
                 string solutionFolder = Solution; // <-- die komt uit je OpenFileDialog
                 string connString = SettingsReader.FindConnectionString(solutionFolder);
@@ -369,19 +517,142 @@ namespace MVVMatic
 
                 DataBaseString = connString;
                 DatabaseName = dbName;
-
-
-
             }
         }
-        
 
 
 
 
+        private void SchrijfModelClassNaarBestand()
+        {
+            string modelCode = GenereerModelClass();
+
+            // Bepaal folderpad en bestandsnaam
+            string folder = Path.Combine(Solution, Namespace + ".Model", Folder);
+            string bestandspad = Path.Combine(folder, $"cls{Model}Model.cs");
+
+            // Maak de folder aan indien nodig
+            if (!Directory.Exists(folder))
+            {
+                Directory.CreateDirectory(folder);
+            }
+
+            // Schrijf het bestand weg
+            File.WriteAllText(bestandspad, modelCode, Encoding.UTF8);
+        }
+        private void SchrijfRepositoryInterfaceNaarBestand()
+        {
+            string interfaceCode = GenereerRepositoryInterface();
+
+            // Folderstructuur: bijv. Solution + Namespace.DAL + Folder
+            string folder = Path.Combine(Solution, Namespace + ".DAL", Folder);
+            string bestandspad = Path.Combine(folder, $"I{Model}Repository.cs");
+
+            if (!Directory.Exists(folder))
+            {
+                Directory.CreateDirectory(folder);
+            }
+                  
+
+            // Schrijf weg
+            File.WriteAllText(bestandspad, interfaceCode, Encoding.UTF8);
+       }
+        private void SchrijfRepositoryClassNaarBestand()
+        {
+            string interfaceCode = GenereerRepositoryClass();
+
+            // Folderstructuur: bijv. Solution + Namespace.DAL + Folder
+            string folder = Path.Combine(Solution, Namespace + ".DAL", Folder);
+            string bestandspad = Path.Combine(folder, $"cls{Model}Repository.cs");
+
+            if (!Directory.Exists(folder))
+            {
+                Directory.CreateDirectory(folder);
+            }
+            // Schrijf weg
+            File.WriteAllText(bestandspad, interfaceCode, Encoding.UTF8);
+       }
+
+        private void SchrijfDataServiceInterfaceNaarBestand()
+        {
+            string interfaceCode = GenereerDataServiceInterface();
+
+            // Folderstructuur: bijv. Solution + Namespace.DAL + Folder
+            string folder = Path.Combine(Solution, Namespace, "DataService", Folder);
+            string bestandspad = Path.Combine(folder, $"I{Model}DataService.cs");
+
+            if (!Directory.Exists(folder))
+            {
+                Directory.CreateDirectory(folder);
+            }
+            // Schrijf weg
+            File.WriteAllText(bestandspad, interfaceCode, Encoding.UTF8);
+        }
+        private void SchrijfDataServiceClassNaarBestand()
+        {
+            string interfaceCode = GenereerDataServiceClass();
+
+            // Folderstructuur: bijv. Solution + Namespace.DAL + Folder
+            string folder = Path.Combine(Solution, Namespace, "DataService", Folder);
+            string bestandspad = Path.Combine(folder, $"cls{Model}DataService.cs");
+
+            if (!Directory.Exists(folder))
+            {
+                Directory.CreateDirectory(folder);
+            }
+            // Schrijf weg
+            File.WriteAllText(bestandspad, interfaceCode, Encoding.UTF8);
+        }
+        private void SchrijfViewModelNaarBestand()
+        {
+            string interfaceCode = GenereerViewModel();
+
+            // Folderstructuur: bijv. Solution + Namespace.DAL + Folder
+            string folder = Path.Combine(Solution, Namespace, "ViewModel", Folder);
+            string bestandspad = Path.Combine(folder, $"cls{Model}ViewModel.cs");
+
+            if (!Directory.Exists(folder))
+            {
+                Directory.CreateDirectory(folder);
+            }
+            // Schrijf weg
+            File.WriteAllText(bestandspad, interfaceCode, Encoding.UTF8);
+        }
+
+        private void SchrijfViewNaarBestand()
+        {
+            // Genereer inhoud
+            string xamlInhoud = GenereerXamlUserControl();
+            string csInhoud = GenereerXamlCodeBehind();
+
+            // Doelmap: Solution + Namespace + \View\{Folder}
+            string folder = Path.Combine(Solution, Namespace, "View", Folder);
+            string xamlPad = Path.Combine(folder, $"uc{Model}.xaml");
+            string csPad = Path.Combine(folder, $"uc{Model}.xaml.cs");
+
+            if (!Directory.Exists(folder))
+            {
+                Directory.CreateDirectory(folder);
+            }
+
+            // Schrijf beide bestanden weg
+            File.WriteAllText(xamlPad, xamlInhoud, Encoding.UTF8);
+            File.WriteAllText(csPad, csInhoud, Encoding.UTF8);
+       }
 
 
 
+        private void BtnGenereerAllCode_Click(object sender, RoutedEventArgs e)
+        {
+            SchrijfModelClassNaarBestand();
+            SchrijfRepositoryInterfaceNaarBestand();
+            SchrijfRepositoryClassNaarBestand();
+            SchrijfDataServiceInterfaceNaarBestand();
+            SchrijfDataServiceClassNaarBestand();
+            SchrijfViewModelNaarBestand();
+            SchrijfViewNaarBestand();
+
+        }
 
 
 

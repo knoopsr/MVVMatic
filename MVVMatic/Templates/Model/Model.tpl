@@ -5,7 +5,7 @@ using System.ComponentModel;
 
 namespace {Namespace}.Model.{Folder}
 {
-    public class cls{ModelName}Model : clsCommonModelPropertiesBase, IDataErrorInfo
+    public class cls{ModelName}Model : clsCommonModelPropertiesBase, IDataErrorInfo, ICreatableModel
     {
 {Properties}
 
